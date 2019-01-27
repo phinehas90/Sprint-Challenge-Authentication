@@ -1,7 +1,7 @@
 const axios = require('axios');
 const db = require('../database/dbHelper');
 
-const { authenticate, hash, generateToken } = require('../auth/authenticate');
+const { authenticate, hash, generateToken, checkPW } = require('../auth/authenticate');
 
 module.exports = server => {
   server.post('/api/register', register);
@@ -39,7 +39,26 @@ function register(req, res) {
 
 function login(req, res) {
   // implement user login
-  
+  const creds = req.body;
+  if(creds.username && creds.password){
+    db.getUser(creds)
+        .then(users => {
+            if(users.length && checkPW(creds.password, users[0].password)){
+              const token = generateToken(creds);
+              res.status(200).json({ token })
+            } else {
+                res.status(404).json({err: "Invalid username or password"})
+            }
+        })
+        .catch( err => {
+            res
+                .status(500)
+                .send(console.log(err));
+        })
+  } else {
+      res.status(400)
+          .send({message: "You must provide a username and password" });
+  }
 }
 
 function getJokes(req, res) {

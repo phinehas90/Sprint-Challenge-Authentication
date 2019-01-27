@@ -7,7 +7,7 @@ const jwtKey =
 
 // quickly see what this file exports
 module.exports = {
-  authenticate, hash, generateToken
+  authenticate, hash, generateToken, checkPW
 };
 
 // implementation details
@@ -43,4 +43,7 @@ function authenticate(req, res, next) {
 
 function hash(password) {
   return bcrypt.hashSync(password, 10);
+}
+function checkPW(sentPW, comparePW) {
+  return bcrypt.compareSync(sentPW, comparePW)
 }
