@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const jwtKey =
   process.env.JWT_SECRET ||
@@ -6,10 +7,22 @@ const jwtKey =
 
 // quickly see what this file exports
 module.exports = {
-  authenticate,
+  authenticate, hash, generateToken
 };
 
 // implementation details
+
+function generateToken(user, id) {
+  const payload = {
+      username: user.username,
+      sub: `${id}`
+  }
+  const options = {
+      expiresIn: '1h'
+  }
+  return jwt.sign(payload, jwtKey, options);
+}
+
 function authenticate(req, res, next) {
   const token = req.get('Authorization');
 
@@ -26,4 +39,8 @@ function authenticate(req, res, next) {
       error: 'No token provided, must be set on the Authorization Header',
     });
   }
+}
+
+function hash(password) {
+  return bcrypt.hashSync(password, 10);
 }
